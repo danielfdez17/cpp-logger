@@ -22,16 +22,16 @@ INCLUDES = -I ./inc/
 OBJ_DIR = ./obj/
 
 # * Sources files
-BITCOIN_EXCHANGE_DIR = ./src/
-BITCOIN_EXCHANGE_SRCS = 	main.cpp Logger.cpp
+LOGGER_DIR = ./src/
+LOGGER_SRCS = 	main.cpp Logger.cpp
 
-SRCS = $(BITCOIN_EXCHANGE_SRCS)
+SRCS = $(LOGGER_SRCS)
 
 # * Object files
 OBJS = $(addprefix $(OBJ_DIR), $(SRCS:.cpp=.o))
 
 # ! RULES
-$(OBJ_DIR)%.o: $(BITCOIN_EXCHANGE_DIR)%.cpp
+$(OBJ_DIR)%.o: $(LOGGER_DIR)%.cpp
 	@mkdir -p $(OBJ_DIR)
 	@$(MYCPP) $(MYCPPFLAGS) $(INCLUDES) -c $< -o $@
 

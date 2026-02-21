@@ -6,11 +6,14 @@ RESET = \033[0m
 OK = $(GREEN)[OK]$(RESET)
 
 # * Program name
-NAME = logger.out
+NAME = logger.a
 
 # * Compilation
 MYCPP = c++
 MYCPPFLAGS = -Wall -Wextra -Werror -std=c++98 -g3 -fsanitize=address
+
+# * Archiver
+AR = ar -rcs
 
 # * Removal
 RM = rm -rf
@@ -36,7 +39,7 @@ $(OBJ_DIR)%.o: $(LOGGER_DIR)%.cpp
 	@$(MYCPP) $(MYCPPFLAGS) $(INCLUDES) -c $< -o $@
 
 $(NAME): $(OBJS)
-	@$(MYCPP) $(MYCPPFLAGS) $(INCLUDES) $(OBJS) -o $(NAME)
+	@$(AR) $(NAME) $(OBJS)
 	@echo "$(OK) $(GREEN)$(NAME)$(RESET)"
 
 all: obj logs $(NAME)

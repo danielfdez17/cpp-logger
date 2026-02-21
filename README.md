@@ -1,0 +1,1 @@
+# Simple CPP logger to be included in bigger projects such as ft_irc

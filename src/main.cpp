@@ -5,11 +5,11 @@
 int main()
 {
 	Logger logger;
-	logger.log(E_INFO, "This is an info message.");
-	logger.log(E_ERROR, "This is an error message.");
-	logger.log(E_OK, "This is an OK message.");
-	logger.log(E_DEBUG, "This is a debug message.");
-	logger.log(E_WARNING, "This is a warning message.");
+	logger.info("This is an info message.");
+	logger.error("This is an error message.");
+	logger.ok("This is an OK message.");
+	logger.debug("This is a debug message.");
+	logger.warning("This is a warning message.");
 
 	return 0;
 }

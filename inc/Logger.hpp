@@ -25,6 +25,7 @@ private:
 	Logger&		operator=(const Logger& other);
 	std::string	getMsgLevel(std::string const& level);
 	char		*getCurrentTime();
+	void		logToFile(const std::string& message);
 
 public:
 				Logger();

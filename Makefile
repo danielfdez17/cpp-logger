@@ -39,6 +39,9 @@ MAIN_OBJ = $(OBJ_DIR)main.o
 # * Executable program
 PROG = logger.out
 
+# * Logs directory
+LOGS_DIR = ./logs/
+
 # ! RULES
 $(OBJ_DIR)%.o: $(LOGGER_DIR)%.cpp
 	@mkdir -p $(OBJ_DIR)
@@ -56,42 +59,49 @@ $(PROG): $(OBJS) $(MAIN_OBJ)
 	@$(MYCPP) $(MYCPPFLAGS) $(MAIN_OBJ) $(NAME) -o $@
 	@echo "$(OK) $(GREEN)$(PROG)$(RESET)"
 
+# ? 🔨 Compiles the whole library
 all: obj logs $(NAME)
 
+# ? 📁 Creates the objects directory if it doesn't exist
 obj:
 	@mkdir -p $(OBJ_DIR)
 
+# ? 📁 Creates the logs directory if it doesn't exist
 logs:
-	@mkdir -p logs
+	@mkdir -p $(LOGS_DIR)
 
+# ? 🧹 Removes the object files
 clean:
 	@$(RM) $(OBJS) $(MAIN_OBJ)
 	@echo "$(OK) $(RED)Removed object files$(RESET)"
 
+# ? 🗑️ Removes both object and executable files
 fclean: clean
 	@$(RM) $(NAME) $(PROG)
 	@echo "$(OK) $(RED)Removed $(NAME) and $(PROG)$(RESET)"
 
+# ? 🔁 Rebuilds the program
 re: fclean all
 	@echo "$(OK) $(YELLOW)Rebuilt $(NAME) and $(PROG)$(RESET)"
 
-# ? This rule is for local testing purposes, it will compile main.cpp and run the program.
-# ? It is not meant to be used for unit testing or any other kind of automated testing.
+# ? 🧪 This rule is for local testing purposes, it will compile main.cpp and run the program.
 test: re $(PROG)
 	@echo "$(OK) $(GREEN)Running tests...$(RESET)"
 	@./$(PROG)
 
+# ? ❓ Displays this help message
 help:
-	@echo "$(YELLOW)Usage: make [target]"
-	@echo "$(BLUE)Targets:"
-	@echo "  all     - Compile the library and the program"
-	@echo "  obj     - Create the object files directory"
-	@echo "  logs    - Create the logs directory"
-	@echo "  clean   - Remove object files"
-	@echo "  fclean  - Remove object files and executables"
-	@echo "  re      - Rebuild everything"
-	@echo "  test    - Compile and run the program"
-	@echo "  help    - Show this help message $(RESET)"
+	@awk '\
+		BEGIN { blue = "\033[0;34m"; green = "\033[0;32m"; reset = "\033[0m"; yellow = "\033[0;33m"; print yellow "Usage: make [target]"; print "Targets:" } \
+		/^# \?/ { desc = substr($$0, 5); next } \
+		/^$$/ { desc = ""; next } \
+		/^[a-zA-Z0-9][a-zA-Z0-9_.-]*:/ { \
+			target = $$1; \
+			sub(/:.*/, "", target); \
+			if (target !~ /^\./) \
+				printf "  " blue "%-12s" reset green "%s" reset "\n", target, desc; \
+			desc = ""; \
+		}' $(firstword $(MAKEFILE_LIST))
 
 .PHONY: all obj clean fclean re run debug
 

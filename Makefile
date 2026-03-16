@@ -6,6 +6,8 @@ BLUE = \033[0;34m
 RESET = \033[0m
 OK = $(GREEN)[OK]$(RESET)
 
+MAKEFLAGS := -j$(shell nproc)
+
 # * Program name
 NAME = logger.a
 

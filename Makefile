@@ -6,7 +6,7 @@ BLUE = \033[0;34m
 RESET = \033[0m
 OK = $(GREEN)[OK]$(RESET)
 
-MAKEFLAGS := -j$(shell nproc)
+NOPRINT := --no-print-directory
 
 # * Program name
 NAME = logger.a
@@ -78,16 +78,21 @@ clean:
 	@echo "$(OK) $(RED)Removed object files$(RESET)"
 
 # ? 🗑️ Removes both object and executable files
-fclean: clean
+fclean: #clean
+	@$(MAKE) $(NOPRINT) clean
 	@$(RM) $(NAME) $(PROG)
 	@echo "$(OK) $(RED)Removed $(NAME) and $(PROG)$(RESET)"
 
 # ? 🔁 Rebuilds the program
-re: fclean all
+re: #fclean all
+	@$(MAKE) $(NOPRINT) fclean
+	@$(MAKE) $(NOPRINT) all
 	@echo "$(OK) $(YELLOW)Rebuilt $(NAME) and $(PROG)$(RESET)"
 
 # ? 🧪 This rule is for local testing purposes, it will compile main.cpp and run the program.
-test: re $(PROG)
+test: #re $(PROG)
+	@$(MAKE) $(NOPRINT) re
+	@$(MAKE) $(NOPRINT) $(PROG)
 	@echo "$(OK) $(GREEN)Running tests...$(RESET)"
 	@./$(PROG)
 

@@ -4,7 +4,7 @@ RED = \033[0;31m
 YELLOW = \033[0;33m
 BLUE = \033[0;34m
 RESET = \033[0m
-OK = $(GREEN)[OK]$(RESET)
+OK = $(GREEN)[$(NAME)]$(RESET)
 
 NOPRINT := --no-print-directory
 
@@ -13,7 +13,17 @@ NAME = logger.a
 
 # * Compilation
 MYCPP = c++
-MYCPPFLAGS = -Wall -Wextra -Werror -std=c++98 -g3 -fsanitize=address
+WARNING_FLAGS = -Wall -Wextra -Werror -std=c++98
+
+BUILD_TYPE ?= release
+
+ifeq ($(BUILD_TYPE),debug)
+	OPT_FLAGS = -g3 -fsanitize=address -ggdb -O0
+else
+	OPT_FLAGS = -O2
+endif
+
+MYCPPFLAGS = $(WARNING_FLAGS) $(OPT_FLAGS)
 
 # * Archiver
 AR = ar -rcs

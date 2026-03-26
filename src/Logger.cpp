@@ -87,7 +87,7 @@ void	Logger::error(const std::string message)
 	std::ostringstream oss, ossFile;
 	oss << buffer << RED << levelStr << message << RESET "\n";
 	ossFile << buffer << levelStr << message << "\n";
-	std::cout << oss.str();
+	std::cerr << oss.str();
 	this->logToFile(ossFile.str());
 	delete[] buffer;
 }

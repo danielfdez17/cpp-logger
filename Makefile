@@ -1,29 +1,45 @@
-# * Colors
-GREEN = \033[0;32m
-RED = \033[0;31m
-YELLOW = \033[0;33m
-BLUE = \033[0;34m
-RESET = \033[0m
-OK = $(GREEN)[$(NAME)]$(RESET)
-
-NOPRINT := --no-print-directory
-
-# * Program name
+# * Library name
 NAME = logger.a
 
-# * Compilation
-MYCPP = c++
-WARNING_FLAGS = -Wall -Wextra -Werror -std=c++98
+# * Executable name
+PROG = logger.out
+
+# * Utils
+RESET = \033[0m
+RED = \033[0;31m
+GREEN = \033[0;32m
+YELLOW = \033[0;33m
+BLUE = \033[0;34m
+MAGENTA = \033[0;35m
+CYAN = \033[0;36m
+LOGGER = $(MAGENTA)[$(NAME)]$(RESET)
+
+# * Timer helper
+define RUN_AND_LOG
+	@start_ms=$$(date +%s%3N); \
+	$(1); status=$$?; \
+	end_ms=$$(date +%s%3N); \
+	elapsed_ms=$$((end_ms - start_ms)); \
+	if [ $$status -eq 0 ]; then \
+		printf "%b [%sms]\n" "$(2)" "$$elapsed_ms"; \
+	fi; \
+	exit $$status
+endef
+
+# * Compiler and flags
+MYCXX = c++
+WARNING_FLAGS = -Wall -Wextra -Werror
+CPPFLAGS = -I./inc -MMD -MP -std=c++98
 
 BUILD_TYPE ?= release
 
 ifeq ($(BUILD_TYPE),debug)
-	OPT_FLAGS = -g3 -fsanitize=address -ggdb -O0
+	OPT_FLAGS = -g3 -fsanitize=address -ggdb -O0 # Optimize for debugging, not for speed
 else
-	OPT_FLAGS = -O2
+	OPT_FLAGS = -O2 # Optimize for speed, but not at the cost of debuggability
 endif
 
-MYCPPFLAGS = $(WARNING_FLAGS) $(OPT_FLAGS)
+CFLAGS = $(WARNING_FLAGS) $(OPT_FLAGS)
 
 # * Archiver
 AR = ar -rcs
@@ -31,48 +47,46 @@ AR = ar -rcs
 # * Removal
 RM = rm -rf
 
-# * Includes
-INCLUDES = -I ./inc/
+NOPRINT += --no-print-directory
 
-# * Objects dir
-OBJ_DIR = ./obj/
-
-# * Sources files
-LOGGER_DIR = ./src/
-LOGGER_SRCS = Logger.cpp
-MAIN_SRC = main.cpp
-
-SRCS = $(LOGGER_SRCS)
+# * Source files
+LOGGER_SRCS = src/Logger.cpp
+MAIN_SRCS = src/main.cpp
 
 # * Object files
-OBJS = $(addprefix $(OBJ_DIR), $(SRCS:.cpp=.o))
-MAIN_OBJ = $(OBJ_DIR)main.o
-
-# * Executable program
-PROG = logger.out
+OBJ_DIR = obj
+LOGGER_OBJS = $(addprefix $(OBJ_DIR)/,$(LOGGER_SRCS:.cpp=.o))
+LOGGER_DEPS = $(addprefix $(OBJ_DIR)/,$(LOGGER_SRCS:.cpp=.d))
+MAIN_OBJS = $(addprefix $(OBJ_DIR)/,$(MAIN_SRCS:.cpp=.o))
+MAIN_DEPS = $(addprefix $(OBJ_DIR)/,$(MAIN_SRCS:.cpp=.d))
+-include $(LOGGER_DEPS) $(MAIN_DEPS)
 
 # * Logs directory
-LOGS_DIR = ./logs/
+LOGS_DIR = logs
 
-# ! RULES
-$(OBJ_DIR)%.o: $(LOGGER_DIR)%.cpp
-	@mkdir -p $(OBJ_DIR)
-	@$(MYCPP) $(MYCPPFLAGS) $(INCLUDES) -c $< -o $@
+# ! Rules
+# ? Links a .cpp to its .o file
+$(OBJ_DIR)/%.o: %.cpp
+	@mkdir -p $(dir $@)
+	@$(MYCXX) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
-$(OBJ_DIR)main.o: $(LOGGER_DIR)$(MAIN_SRC)
-	@mkdir -p $(OBJ_DIR)
-	@$(MYCPP) $(MYCPPFLAGS) $(INCLUDES) -c $< -o $@
+$(NAME): $(LOGGER_OBJS)
+	$(call RUN_AND_LOG,$(AR) $(NAME) $(LOGGER_OBJS),$(LOGGER) $(GREEN)Built $(NAME) $(RESET))
 
-$(NAME): $(OBJS)
-	@$(AR) $(NAME) $(OBJS)
-	@echo "$(OK) $(GREEN)$(NAME)$(RESET)"
-
-$(PROG): $(OBJS) $(MAIN_OBJ)
-	@$(MYCPP) $(MYCPPFLAGS) $(MAIN_OBJ) $(NAME) -o $@
-	@echo "$(OK) $(GREEN)$(PROG)$(RESET)"
+$(PROG): $(NAME) $(MAIN_OBJS)
+	$(call RUN_AND_LOG,$(MYCXX) $(CFLAGS) $(MAIN_OBJS) $(NAME) -o $(PROG),$(LOGGER) $(GREEN)Built $(PROG) $(RESET))
 
 # ? 🔨 Compiles the whole library
-all: obj logs $(NAME)
+all: #$(NAME)
+	@build_plan="$$($(MAKE) -s -n $(NAME) $(NOPRINT) 2>&1)"; status=$$?; \
+	if [ $$status -ne 0 ]; then \
+		printf "%s\n" "$$build_plan"; \
+		exit $$status; \
+	elif [ -n "$$build_plan" ]; then \
+		$(MAKE) $(NAME) $(NOPRINT); \
+	else \
+		printf "%b\n" "$(LOGGER) $(CYAN)Everything is up to date$(RESET)"; \
+	fi
 
 # ? 📁 Creates the objects directory if it doesn't exist
 obj:
@@ -84,27 +98,19 @@ logs:
 
 # ? 🧹 Removes the object files
 clean:
-	@$(RM) $(OBJS) $(MAIN_OBJ)
-	@echo "$(OK) $(RED)Removed object files$(RESET)"
+	$(call RUN_AND_LOG,$(RM) $(OBJ_DIR),$(LOGGER) $(RED)Object files removed $(RESET))
 
 # ? 🗑️ Removes both object and executable files
-fclean: #clean
-	@$(MAKE) $(NOPRINT) clean
-	@$(RM) $(NAME) $(PROG)
-	@echo "$(OK) $(RED)Removed $(NAME) and $(PROG)$(RESET)"
+fclean:
+	$(call RUN_AND_LOG,$(MAKE) clean $(NOPRINT); $(RM) $(NAME) $(PROG),$(LOGGER) $(RED)Removed $(RESET))
 
-# ? 🔁 Rebuilds the program
-re: #fclean all
-	@$(MAKE) $(NOPRINT) fclean
-	@$(MAKE) $(NOPRINT) all
-	@echo "$(OK) $(YELLOW)Rebuilt $(NAME) and $(PROG)$(RESET)"
+# ? 🔁 Rebuilds the library
+re:
+	$(call RUN_AND_LOG,$(MAKE) fclean $(NOPRINT); $(MAKE) all BUILD_TYPE=$(BUILD_TYPE) $(NOPRINT),$(LOGGER) $(YELLOW)Rebuilt $(RESET))
 
-# ? 🧪 This rule is for local testing purposes, it will compile main.cpp and run the program.
-test: #re $(PROG)
-	@$(MAKE) $(NOPRINT) re
-	@$(MAKE) $(NOPRINT) $(PROG)
-	@echo "$(OK) $(GREEN)Running tests...$(RESET)"
-	@./$(PROG)
+# ? 🧪 Compiles main.cpp and runs the program
+test:
+	$(call RUN_AND_LOG,$(MAKE) re $(NOPRINT); $(MAKE) $(PROG) $(NOPRINT); ./$(PROG),$(LOGGER) $(GREEN)Tests ran $(RESET))
 
 # ? ❓ Displays this help message
 help:
@@ -120,6 +126,6 @@ help:
 			desc = ""; \
 		}' $(firstword $(MAKEFILE_LIST))
 
-.PHONY: all obj clean fclean re run debug
+.PHONY: all obj logs clean fclean re test help
 
-.DEFAULT_GOAL: all
+.DEFAULT_GOAL := all

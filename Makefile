@@ -106,11 +106,11 @@ fclean:
 
 # ? 🔁 Rebuilds the library
 re:
-	$(call RUN_AND_LOG,$(MAKE) fclean $(NOPRINT); $(MAKE) all BUILD_TYPE=$(BUILD_TYPE) $(NOPRINT),$(LOGGER) $(YELLOW)Rebuilt $(RESET))
+	$(call RUN_AND_LOG,$(MAKE) fclean $(NOPRINT); $(MAKE) obj logs $(NOPRINT); $(MAKE) all BUILD_TYPE=$(BUILD_TYPE) $(NOPRINT),$(LOGGER) $(YELLOW)Rebuilt $(RESET))
 
 # ? 🧪 Compiles main.cpp and runs the program
 test:
-	$(call RUN_AND_LOG,$(MAKE) re $(NOPRINT); $(MAKE) $(PROG) $(NOPRINT); ./$(PROG),$(LOGGER) $(GREEN)Tests ran $(RESET))
+	$(call RUN_AND_LOG,$(MAKE) re $(NOPRINT); $(MAKE) obj logs $(NOPRINT); $(MAKE) $(PROG) $(NOPRINT); ./$(PROG),$(LOGGER) $(GREEN)Tests ran $(RESET))
 
 # ? ❓ Displays this help message
 help:

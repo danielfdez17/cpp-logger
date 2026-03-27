@@ -6,33 +6,25 @@
 #include <sstream>
 #include <string>
 
-
 class Logger
 {
 private:
-	// typedef enum e_level
-	// {
-	// 	E_INFO,
-	// 	E_ERROR,
-	// 	E_OK,
-	// 	E_DEBUG,
-	// 	E_WARNING
-	// }	t_level;
+	static Logger *instance;
+	static std::ofstream logFile;
 
-	std::ofstream	logFile;
-
-				Logger(const Logger& other);
-	Logger&		operator=(const Logger& other);
-	std::string	getMsgLevel(std::string const& level);
-	char		*getCurrentTime();
-	void		logToFile(const std::string& message);
+	Logger();
+	Logger(const Logger &other);
+	Logger &operator=(const Logger &other);
+	static std::string getMsgLevel(std::string const &level);
+	static char *getCurrentTime();
+	static void logToFile(const std::string &message);
 
 public:
-				Logger();
-				~Logger();
-	void		info(const std::string message);
-	void		error(const std::string message);
-	void		ok(const std::string message);
-	void		debug(const std::string message);
-	void		warning(const std::string message);
+	~Logger();
+	static Logger *getInstance();
+	static void info(const std::string message);
+	static void error(const std::string message);
+	static void ok(const std::string message);
+	static void debug(const std::string message);
+	static void warning(const std::string message);
 };

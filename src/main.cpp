@@ -1,15 +1,15 @@
-#include "Logger.hpp"
-#include "utils.hpp"
+// Copyright (c) 2026 Daniel Fernández
 #include <iostream>
+#include "../inc/Logger.hpp"
+#include "../inc/utils.hpp"
 
-int main()
-{
-	Logger *logger = Logger::getInstance();
-	logger->info("This is an info message.");
-	logger->error("This is an error message.");
-	logger->ok("This is an OK message.");
-	logger->debug("This is a debug message.");
-	logger->warning("This is a warning message.");
+int main() {
+    Logger::getInstance();
+    Logger::info("This is an info message.");
+    Logger::error("This is an error message.");
+    Logger::ok("This is an OK message.");
+    Logger::debug("This is a debug message.");
+    Logger::warning("This is a warning message.");
 
-	return 0;
+    return 0;
 }

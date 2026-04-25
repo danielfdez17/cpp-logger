@@ -1,3 +1,6 @@
+SHELL := /usr/bin/bash
+.SHELLFLAGS := -ec
+
 # * Library name
 NAME = logger.a
 
@@ -111,6 +114,12 @@ re:
 # ? 🧪 Compiles main.cpp and runs the program
 test:
 	$(call RUN_AND_LOG,$(MAKE) re $(NOPRINT); $(MAKE) obj logs $(NOPRINT); $(MAKE) $(PROG) $(NOPRINT); ./$(PROG),$(LOGGER) $(GREEN)Tests ran $(RESET))
+
+# ? Run cpplint on source and header files (pipx install cpplint)
+lint:
+	@echo -e "$(CYAN)Running cpplint...$(RESET)"
+	@cpplint --recursive src inc
+	@echo -e "$(GREEN)cpplint completed successfully!$(RESET)"
 
 # ? ❓ Displays this help message
 help:

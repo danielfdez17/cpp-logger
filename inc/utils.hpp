@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Daniel Fernández
 #pragma once
 // #ifndef __UTILS_HPP__
 // #define __UTILS_HPP__
@@ -15,5 +16,3 @@
 #define ERROR RED << "[ERROR] "
 #define OK GREEN << "[OK] "
 #define DEBUG MAGENTA << "[DEBUG] "
-
-// #endif // __UTILS_HPP__

@@ -1,150 +1,142 @@
-#include "Logger.hpp"
-#include "utils.hpp"
+// Copyright (c) 2026 Daniel Fernández
+#include <iostream>
+#include <string>
+#include "../inc/Logger.hpp"
+#include "../inc/utils.hpp"
 
 Logger *Logger::instance = NULL;
 std::ofstream Logger::logFile;
 
-Logger::Logger(const Logger &other)
-{
-	(void)other;
+Logger::Logger(const Logger &other) {
+    (void)other;
 }
 
-Logger &Logger::operator=(const Logger &other)
-{
-	(void)other;
-	return *this;
+Logger &Logger::operator=(const Logger &other) {
+    (void)other;
+    return *this;
 }
 
-std::string Logger::getMsgLevel(std::string const &level)
-{
-	if (level == "info")
-		return " [INFO] ";
-	else if (level == "error")
-		return " [ERROR] ";
-	else if (level == "ok")
-		return " [OK] ";
-	else if (level == "debug")
-		return " [DEBUG] ";
-	else if (level == "warning")
-		return " [WARNING] ";
-	else
-		return "UNKNOWN";
+std::string Logger::getMsgLevel(std::string const &level) {
+    if (level == "info")
+        return " [INFO] ";
+    else if (level == "error")
+        return " [ERROR] ";
+    else if (level == "ok")
+        return " [OK] ";
+    else if (level == "debug")
+        return " [DEBUG] ";
+    else if (level == "warning")
+        return " [WARNING] ";
+    else
+        return "UNKNOWN";
 }
 
-char *Logger::getCurrentTime()
-{
-	time_t now = time(0);
-	tm *timeinfo = localtime(&now);
-	std::string str;
-	char *buffer = new char[20];
-	strftime(buffer, 20, "%Y-%m-%d %H:%M:%S", timeinfo);
-	return buffer;
+char *Logger::getCurrentTime() {
+    time_t now = time(0);
+    struct tm tm_struct;
+    const tm *timeinfo = localtime_r(&now, &tm_struct);
+    std::string str;
+    char *buffer = new char[20];
+    strftime(buffer, 20, "%Y-%m-%d %H:%M:%S", timeinfo);
+    return buffer;
 }
 
-void Logger::logToFile(const std::string &message)
-{
-	if (logFile.is_open())
-	{
-		logFile << message;
-		logFile.flush();
-	}
+void Logger::logToFile(const std::string &message) {
+    if (logFile.is_open()) {
+        logFile << message;
+        logFile.flush();
+    }
 }
 
-Logger *Logger::getInstance()
-{
-	if (instance == NULL)
-	{
-		instance = new Logger();
-		char *buffer = getCurrentTime();
-		std::stringstream ss;
-		ss << "logs/" << buffer << ".log";
-		logFile.open(ss.str().c_str(), std::ios::out);
-		if (!logFile.is_open())
-		{
-			std::cerr << ERROR "Failed to open log file: " << ss.str() << "\n" RESET;
-		}
-		delete[] buffer;
-	}
-	return instance;
+Logger *Logger::getInstance() {
+    if (instance == NULL) {
+        instance = new Logger();
+        char *buffer = getCurrentTime();
+        std::stringstream ss;
+        ss << "logs/" << buffer << ".log";
+        logFile.open(ss.str().c_str(), std::ios::out);
+        if (!logFile.is_open())
+            std::cerr
+                << ERROR "Failed to open log file: "
+                << ss.str() << "\n" RESET;
+        delete[] buffer;
+    }
+    return instance;
 }
 
-Logger::Logger()
-{
-	char *buffer = getCurrentTime();
-	std::stringstream ss;
-	ss << "logs/" << buffer << ".log";
-	logFile.open(ss.str().c_str(), std::ios::out);
-	if (!logFile.is_open())
-	{
-		std::cerr << ERROR "Failed to open log file: " << ss.str() << "\n" RESET;
-	}
-	delete[] buffer;
+Logger::Logger() {
+    char *buffer = getCurrentTime();
+    std::stringstream ss;
+    ss << "logs/" << buffer << ".log";
+    logFile.open(ss.str().c_str(), std::ios::out);
+    if (!logFile.is_open())
+        std::cerr
+            << ERROR "Failed to open log file: "
+            << ss.str() << "\n" RESET;
+    delete[] buffer;
 }
 
-Logger::~Logger()
-{
-	if (logFile.is_open())
-	{
-		logFile.close();
-	}
+Logger::~Logger() {
+    if (logFile.is_open())
+        logFile.close();
 }
 
-void Logger::info(const std::string message)
-{
-	std::string levelStr = getMsgLevel(__func__);
-	char *buffer = getCurrentTime();
-	std::ostringstream oss, ossFile;
-	oss << buffer << BLUE << levelStr << message << RESET "\n";
-	ossFile << buffer << levelStr << message << "\n";
-	std::cout << oss.str();
-	logToFile(ossFile.str());
-	delete[] buffer;
+void Logger::info(const std::string & message) {
+    std::string levelStr = getMsgLevel(__func__);
+    char *buffer = getCurrentTime();
+    std::ostringstream oss;
+    std::ostringstream ossFile;
+    oss << buffer << BLUE << levelStr << message << RESET "\n";
+    ossFile << buffer << levelStr << message << "\n";
+    std::cout << oss.str();
+    logToFile(ossFile.str());
+    delete[] buffer;
 }
 
-void Logger::error(const std::string message)
-{
-	std::string levelStr = getMsgLevel(__func__);
-	char *buffer = getCurrentTime();
-	std::ostringstream oss, ossFile;
-	oss << buffer << RED << levelStr << message << RESET "\n";
-	ossFile << buffer << levelStr << message << "\n";
-	std::cerr << oss.str();
-	logToFile(ossFile.str());
-	delete[] buffer;
+void Logger::error(const std::string & message) {
+    std::string levelStr = getMsgLevel(__func__);
+    char *buffer = getCurrentTime();
+    std::ostringstream oss;
+    std::ostringstream ossFile;
+    oss << buffer << RED << levelStr << message << RESET "\n";
+    ossFile << buffer << levelStr << message << "\n";
+    std::cerr << oss.str();
+    logToFile(ossFile.str());
+    delete[] buffer;
 }
 
-void Logger::ok(const std::string message)
-{
-	std::string levelStr = getMsgLevel(__func__);
-	char *buffer = getCurrentTime();
-	std::ostringstream oss, ossFile;
-	oss << buffer << GREEN << levelStr << message << RESET "\n";
-	ossFile << buffer << levelStr << message << "\n";
-	std::cout << oss.str();
-	logToFile(ossFile.str());
-	delete[] buffer;
+void Logger::ok(const std::string & message) {
+    std::string levelStr = getMsgLevel(__func__);
+    char *buffer = getCurrentTime();
+    std::ostringstream oss;
+    std::ostringstream ossFile;
+    oss << buffer << GREEN << levelStr << message << RESET "\n";
+    ossFile << buffer << levelStr << message << "\n";
+    std::cout << oss.str();
+    logToFile(ossFile.str());
+    delete[] buffer;
 }
 
-void Logger::debug(const std::string message)
-{
-	std::string levelStr = getMsgLevel(__func__);
-	char *buffer = getCurrentTime();
-	std::ostringstream oss, ossFile;
-	oss << buffer << MAGENTA << levelStr << message << RESET "\n";
-	ossFile << buffer << levelStr << message << "\n";
-	std::cout << oss.str();
-	logToFile(ossFile.str());
-	delete[] buffer;
+void Logger::debug(const std::string & message) {
+    std::string levelStr = getMsgLevel(__func__);
+    char *buffer = getCurrentTime();
+    std::ostringstream oss;
+    std::ostringstream ossFile;
+    oss << buffer << MAGENTA << levelStr << message << RESET "\n";
+    ossFile << buffer << levelStr << message << "\n";
+    std::cout << oss.str();
+    logToFile(ossFile.str());
+    delete[] buffer;
 }
 
-void Logger::warning(const std::string message)
-{
-	std::string levelStr = getMsgLevel(__func__);
-	char *buffer = getCurrentTime();
-	std::ostringstream oss, ossFile;
-	oss << buffer << YELLOW << levelStr << message << RESET "\n";
-	ossFile << buffer << levelStr << message << "\n";
-	std::cout << oss.str();
-	logToFile(ossFile.str());
-	delete[] buffer;
+void Logger::warning(const std::string & message) {
+    std::string levelStr = getMsgLevel(__func__);
+    char *buffer = getCurrentTime();
+    std::ostringstream oss;
+    std::ostringstream ossFile;
+    oss << buffer << YELLOW << levelStr << message << RESET "\n";
+    ossFile << buffer << levelStr << message << "\n";
+    std::cout << oss.str();
+    logToFile(ossFile.str());
+    delete[] buffer;
 }
